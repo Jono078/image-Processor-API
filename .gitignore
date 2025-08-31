@@ -1,0 +1,54 @@
+# Byte-compiled / cached / log files
+__pycache__/
+*.py[cod]
+*.log
+
+# Virtual environment
+venv/
+.env/
+.env.*
+
+# Docker
+*.pid
+*.seed
+*.pid.lock
+docker-compose.override.yml
+
+# OS-generated files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# Python packaging
+build/
+dist/
+*.egg-info/
+*.egg
+
+# Jupyter notebooks checkpoints
+.ipynb_checkpoints
+
+# AWS / Cloud credentials (never commit these!)
+*.pem
+*.key
+*.crt
+*.pub
+
+# Node (if you add frontend later)
+node_modules/
+npm-debug.log*
+
+# Coverage / testing
+htmlcov/
+.tox/
+.coverage
+.cache
+
+# Local dev data
+*.sqlite3
+*.db
