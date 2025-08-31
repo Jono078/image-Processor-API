@@ -47,19 +47,5 @@ export async function processImage(inputPath, outDir, jobId, iterations = 30, ke
     await sharp(outPath).resize({ width: 256}).jpeg({quality: 80}).toFile(thumbPath);
 
     return {outPath, thumbPath, durationMs, kernel: selected === KERNELS[kernel] ? kernel : "edge"};
-    // const buf0 = fs.readFileSync(inputPath);
-    // let buffer = buf0;
-    // for (let i = 0; i < iterations; i++) {
-    //     buffer = await sharp(buffer, {limitInputPixels: false})
-    //         .resize({width: 3840, withoutEnlargement: false})
-    //         .sharpen()
-    //         .median(7)
-    //         .normalize()
-    //         .jpeg({quality: 92 })
-    //         .toBuffer();
-    // }
-    // const outPath = path.join(outDir, `${jobId}.jpg`);
-    // fs.mkdirSync(outDir, {recursive: true });
-    // fs.writeFileSync(outPath, buffer);
-    // return outPath;
+
 }
