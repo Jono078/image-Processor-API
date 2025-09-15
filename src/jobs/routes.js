@@ -3,7 +3,6 @@ import {nanoid} from "nanoid";
 import path from "path";
 import fs from "fs";
 import {db} from "../lib/db.js";
-import { requireAuth } from "../auth/routes.js";
 import { processImage } from "./pipeline.js";
 
 export const router = Router();
@@ -11,7 +10,7 @@ export const router = Router();
 // POST /v1/jobs
 // body { fileId, iterations=30, kernel="edge"}
 // creates a queued job
-router.post("/", requireAuth, (req, res) => {
+router.post("/", (req, res) => {
     const id = nanoid();
     const {fileId, iterations = 30, kernel = "edge"} = req.body || {};
 
@@ -30,7 +29,7 @@ router.post("/", requireAuth, (req, res) => {
 
 //POST /v1/jobs/:id/process
 // runs CPU heavy pipeline and writes output/thumbnail
-router.post("/:id/process", requireAuth, async (req, res, next) => {
+router.post("/:id/process", async (req, res, next) => {
     try{
         const job = db.prepare("SELECT * FROM jobs WHERE id=? AND ownerId=?")
             .get(req.params.id, req.user.sub);
@@ -67,7 +66,7 @@ router.post("/:id/process", requireAuth, async (req, res, next) => {
 
 // GET /v1/jobs
 // query status from to sort 
-router.get("/", requireAuth, (req, res) => {
+router.get("/", (req, res) => {
 
     // Query Params
     const {status, from, to, sort = "createdAt", order = "desc" } = req.query;
@@ -122,7 +121,7 @@ router.get("/", requireAuth, (req, res) => {
  * GET /v1/jobs/:id
  * returns a single job
  */
-router.get("/:id", requireAuth, (req, res) => {
+router.get("/:id", (req, res) => {
     const job = db.prepare("SELECT * FROM jobs WHERE id=? AND ownerId=?")
         .get(req.params.id, req.user.sub);
     if (!job) return res.status(404).json({ code: "NotFound", message: "Job Not Found"});
@@ -133,7 +132,7 @@ router.get("/:id", requireAuth, (req, res) => {
  * GET /v1/jobs/:id/logs
  * returns structured logs for the job(duration, iterations, kernel, )
  */
-router.get("/:id/logs", requireAuth, (req, res) => {
+router.get("/:id/logs", (req, res) => {
     //ensure the job belongs to the user (avoid leaking id)
     const job = db.prepare("SELECT * FROM jobs WHERE id=? AND ownerId=?")
         .get(req.params.id, req.user.sub);

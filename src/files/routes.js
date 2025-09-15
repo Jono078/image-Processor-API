@@ -4,12 +4,11 @@ import {nanoid} from "nanoid";
 import fs from "fs";
 import path from "path";
 import {db} from "../lib/db.js";
-import { requireAuth } from "../auth/routes.js";
 
 const upload = multer({dest: "data/uploads"});
 export const router = Router();
 
-router.post("/", requireAuth, upload.single("file"), (req, res) => {
+router.post("/", upload.single("file"), (req, res) => {
     const id = nanoid();
     const ext = path.extname(req.file.originalname) || "";
     const finalDir = path.join("data", "files", req.user.sub);
@@ -25,7 +24,7 @@ router.post("/", requireAuth, upload.single("file"), (req, res) => {
         res.status(201).json({id});
 });
 
-router.get("/", requireAuth, (req, res) => {
+router.get("/", (req, res) => {
     const {sort = "createdAt", order = "desc", mime, minSize, maxSize } = req.query;
     const limit = Math.min(100, Number(req.query.limit || 20));
     const offset = Math.max(0, Number(req.query.offset || 0));
