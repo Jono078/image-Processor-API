@@ -7,7 +7,7 @@ import {router as auth} from "./auth/routes.js";
 import {router as files} from "./files/routes.js";
 import {router as jobs} from "./jobs/routes.js";
 import requireAuth from "./middleware/requireAuth.js"; 
-
+import 'dotenv/config';
 
 dotenv.config();
 const app = express();
