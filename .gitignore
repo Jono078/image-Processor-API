@@ -57,3 +57,9 @@ htmlcov/
 /data/*.sqlite*
 src.zip
 .env
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
