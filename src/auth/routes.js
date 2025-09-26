@@ -1,11 +1,7 @@
 // src/auth/routes.js
 import { Router } from "express";
 import crypto from "crypto";
-import {
-  CognitoIdentityProviderClient,
-  InitiateAuthCommand,
-  RespondToAuthChallengeCommand,
-} from "@aws-sdk/client-cognito-identity-provider";
+import {CognitoIdentityProviderClient,InitiateAuthCommand,RespondToAuthChallengeCommand} from "@aws-sdk/client-cognito-identity-provider";
 import { signUp, confirmSignUp } from "./cognito.js";
 
 export const router = Router();
@@ -39,7 +35,7 @@ router.post("/confirm", async (req, res) => {
   }
 });
 
-// UPDATED: Login that auto-selects EMAIL_OTP and returns a session
+
 router.post("/login", async (req, res) => {
   const { username, password } = req.body || {};
   if (!username || !password) return res.status(400).json({ error: "username, password required" });
@@ -54,7 +50,6 @@ router.post("/login", async (req, res) => {
     }
   }));
 
-  // If Cognito asks the client to select a challenge, pick EMAIL_OTP for them
   if (init.ChallengeName === "SELECT_CHALLENGE") {
     const pick = await client.send(new RespondToAuthChallengeCommand({
       ClientId: process.env.COGNITO_CLIENT_ID,
@@ -66,16 +61,13 @@ router.post("/login", async (req, res) => {
         ...(process.env.COGNITO_CLIENT_SECRET ? { SECRET_HASH: secretHash(username) } : {})
       }
     }));
-    // Cognito will now send the email and return the next challenge
     return res.json({ challenge: "EMAIL_OTP", session: pick.Session });
   }
 
-  // If Cognito immediately challenges with EMAIL_OTP, pass that through
   if (init.ChallengeName === "EMAIL_OTP") {
     return res.json({ challenge: "EMAIL_OTP", session: init.Session });
   }
 
-  // No MFA needed, return tokens
   const a = init.AuthenticationResult || {};
   return res.json({
     accessToken: a.AccessToken,
@@ -86,7 +78,6 @@ router.post("/login", async (req, res) => {
   });
 });
 
-// NEW: Submit the email code to finish sign-in
 router.post("/login/mfa-email", async (req, res) => {
   const { username, code, session } = req.body || {};
   if (!username || !code || !session) return res.status(400).json({ error: "username, code, session required" });

@@ -22,12 +22,11 @@ app.get("/v1/external/ping", async (req, res) => {
   const secretId =
     process.env.SECRET_ID_OVERRIDE || "a2/a2group27/external-api-key";
 
-  const before = process.env.EXTERNAL_API_KEY; // for source detection
+  const before = process.env.EXTERNAL_API_KEY;
 
   let source = "env";
   try {
     const v = await readSecret(secretId, { fallbackEnv: "EXTERNAL_API_KEY" });
-    // If the value equals the env var, assume fallback=env; else secrets-manager.
     source = before && v === before ? "env" : "secrets-manager";
   } catch {
     source = "env";
@@ -57,15 +56,6 @@ app.get("/v1/configz", (req, res) => {
     API_BASE_present: !!process.env.API_BASE,
     FRONTEND_URL_present: !!process.env.FRONTEND_URL
   });
-});
-
-app.get("/v1/external/ping", async (req, res) => {
-  try {
-    const apiKey = await readSecret("a2/a2group27/external-api-key", { fallbackEnv: "EXTERNAL_API_KEY" });
-    res.json({ ok: true });
-  } catch (e) {
-    res.status(500).json({ ok: false, error: "SecretUnavailable", message: e?.message || String(e) });
-  }
 });
 
 app.get("/v1/configz/secret", async (req, res) => {
