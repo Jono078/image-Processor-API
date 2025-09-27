@@ -167,7 +167,7 @@ Overview
   - Route53 **A records** for subdomains (optional toggle, if enabled)
   - **Data sources** referencing existing SSM Parameters and Secrets Manager Secret
   - **Outputs** exposing parameter names and secret ARN
-- **Video timestamp:** *(Not required per rubric — covered in the response doc)*
+- **Video timestamp:** N/A
 - **Relevant files:**
   - `main.tf` — resources (e.g., `aws_cognito_user_group`), data sources (SSM/Secrets), outputs
   - `variables.tf` — typed inputs (e.g., `team`, `cognito_user_pool_id`, toggles)
