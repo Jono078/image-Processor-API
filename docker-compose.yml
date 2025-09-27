@@ -5,8 +5,6 @@ services:
       container_name: image-processor-api
       ports:
       - "8080:8080" #host:container
-      volumes: 
-      - ./data:/usr/src/app/data #persist jobs/files/sqlite outside container
       env_file:
       - .env
       command: npm start
