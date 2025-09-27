@@ -32,7 +32,7 @@ variable "external_api_key" {
 
 variable "api_role_name" {
   type        = string
-  description = "Name of the IAM role your API runs as (for policy attachment)"
+  description = "ami-0279a86684f669718"
 }
 
 variable "attach_api_policy" {

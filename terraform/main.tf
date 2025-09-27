@@ -34,7 +34,7 @@ locals {
 }
 
 ############################
-# Optional READ of existing SSM Parameters
+READ of existing SSM Parameters
 ############################
 data "aws_ssm_parameter" "api_base" {
   count = var.enable_param_refs ? 1 : 0
@@ -47,7 +47,7 @@ data "aws_ssm_parameter" "frontend_url" {
 }
 
 ############################
-# Optional READ of existing Secret
+READ of existing Secret
 ############################
 data "aws_secretsmanager_secret" "external_api_key" {
   count = var.enable_secret_ref ? 1 : 0
@@ -59,9 +59,9 @@ data "aws_secretsmanager_secret_version" "external_api_key_latest" {
   secret_id = data.aws_secretsmanager_secret.external_api_key[0].id
 }
 
-############################
-# Outputs (all single-line conditionals)
-############################
+#########
+# Outputs
+#########
 output "cognito_group" {
   value = aws_cognito_user_group.admin.name
 }

@@ -155,7 +155,7 @@ Overview
 - **Relevant files:**
     - `src/config/secret.js` — Secrets Manager client & `readSecret(...)`
     - `src/external/routes.js` — usage example (e.g., `/v1/external/ping` or `secret-demo` that sets `X-Secret-Source`)
-    - *(Outbound calls use the secret for Authorization; value is never logged or returned)*
+
 
 ---
 
