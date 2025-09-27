@@ -1,0 +1,9 @@
+﻿team                 = "a2group27"
+cognito_user_pool_id = "ap-southeast-2_SlIhE0wy8"
+api_base             = "https://api.a2group27.cab432.com"
+frontend_url         = "https://a2group27.cab432.com"
+external_api_key     = "replace-me-in-dev"
+api_role_name        = "YourApiIamRoleName" # e.g., EC2 instance profile role name
+attach_api_policy    = false
+enable_param_refs = false
+enable_secret_ref = false
