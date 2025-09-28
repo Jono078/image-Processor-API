@@ -13,7 +13,7 @@ import { cacheGet, cacheSet, cacheDel } from "../lib/cache.js";
 const upload = multer({dest: "/tmp/uploads"});
 export const router = Router();
 
-router.post("/", requireAuth, upload.single("file"), async (req, res, next) => {
+router.post("/", upload.single("file"), async (req, res, next) => {
     try {
         if (!req.file) return res.status(400).json({ code: "BadRequest", message: "file is required" });
 
@@ -42,7 +42,7 @@ router.post("/", requireAuth, upload.single("file"), async (req, res, next) => {
     } catch (e) {next(e);}
 });
 
-router.get("/", requireAuth, async (req, res, next) => {
+router.get("/", async (req, res, next) => {
     try {
         const limit = Math.min(100, Number(req.query.limit || 20));
         const cacheKey = `files:${req.user.sub}:limit=${limit}`;

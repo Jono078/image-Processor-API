@@ -52,3 +52,14 @@ htmlcov/
 # Local dev data
 *.sqlite3
 *.db
+
+# ignore local DB, zips, env
+/data/*.sqlite*
+src.zip
+.env
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl

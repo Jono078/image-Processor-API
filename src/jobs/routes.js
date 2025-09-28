@@ -17,7 +17,7 @@ export const router = Router();
 // POST /v1/jobs
 // body { fileId, iterations=30, kernel="edge"}
 // creates a queued job
-router.post("/", requireAuth, async (req, res, next) => {
+router.post("/", async (req, res, next) => {
     try{
         const id = nanoid();
         const {fileId, iterations = 30, kernel = "edge"} = req.body || {};
@@ -47,7 +47,7 @@ router.post("/", requireAuth, async (req, res, next) => {
 
 //POST /v1/jobs/:id/process
 // runs CPU heavy pipeline and writes output/thumbnail
-router.post("/:id/process", requireAuth, async (req, res, next) => {
+router.post("/:id/process", async (req, res, next) => {
     let tempIn, outPath, thumbPath;
     let jobIdForError = req.params.id;
     try{
@@ -180,7 +180,7 @@ router.get("/", requireAuth, async (req, res, next) => {
  * GET /v1/jobs/:id
  * returns a single job
  */
-router.get("/:id", requireAuth, async (req, res, next) => {
+router.get("/:id", async (req, res, next) => {
     try{
         const cacheKey = `jobs:${req.user.sub}:${req.params.id}`;
         const cached = await cacheGet(cacheKey);
@@ -199,7 +199,7 @@ router.get("/:id", requireAuth, async (req, res, next) => {
  * GET /v1/jobs/:id/logs
  * returns structured logs for the job(duration, iterations, kernel, )
  */
-router.get("/:id/logs", requireAuth, async (req, res, next) => {
+router.get("/:id/logs", async (req, res, next) => {
     try {
         const job = await ddbGet(Tables.jobs, { ownerId: req.user.sub, id: req.params.id});
         if (!job.Item) return res.status(404).json({ code:"NotFound", message:"Job not found"});
