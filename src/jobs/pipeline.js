@@ -2,6 +2,9 @@ import fs from "fs";
 import sharp from "sharp";
 import path from "path";
 
+sharp.cache(false);
+sharp.concurrency(0);
+
 // a few kernels 
 const KERNELS = {
     edge: {width: 3, height: 3, kernel: [ -1,-1,-1, -1,8,-1, -1,-1,-1 ]},
@@ -44,7 +47,7 @@ export async function processImage(inputPath, outDir, jobId, iterations = 30, ke
 
     // also produce a thumbnail (extra unstrutured data)
     const thumbPath = path.join(outDir, `${jobId}.thumb.jpg`);
-    await sharp(outPath).resize({ width: 256}).jpeg({quality: 80}).toFile(thumbPath);
+    await sharp(buffer).resize({ width: 256}).jpeg({quality: 80}).toFile(thumbPath);
 
     return {outPath, thumbPath, durationMs, kernel: selected === KERNELS[kernel] ? kernel : "edge"};
 
