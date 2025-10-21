@@ -2,6 +2,7 @@ import { SQSClient, ReceiveMessageCommand, DeleteMessageCommand, ChangeMessageVi
 import { S3Client, GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import sharp from "sharp";
 import { Readable } from "node:stream";
+import express from "express";
 
 const {
     AWS_REGION = "ap-southeast-2",
@@ -11,7 +12,9 @@ const {
     S3_OUTPUT_PREFIX = "outputs/",
     VISIBILITY_TIMEOUT_SEC = "180",
     VISIBILITY_EXTEND_SEC = "60",
-    EMPTY_SLEEP_MS = "400"
+    EMPTY_SLEEP_MS = "400",
+    HTTP_MODE = "true",
+    WORKER_PORT = "9000" 
 } = process.env;
 
 if (!JOBS_QUEUE_URL || !S3_BUCKET) {
@@ -94,7 +97,7 @@ async function poll() {
         const heartbeat = setInterval(() => {
             extend(m.ReceiptHandle, parseInt(VISIBILITY_TIMEOUT_SEC, 10)).catch(() => {});
         }, Math.max(10000, (parseInt(VISIBILITY_TIMEOUT_SEC, 10) * 1000) / 2));
-        
+
         try {
             const body = JSON.parse(m.Body);
             await processJob(body);
@@ -107,16 +110,46 @@ async function poll() {
     }
 }
 
-(async function main() {
-    console.log("Worker up. Queue:", JOBS_QUEUE_URL, "Bucket:", S3_BUCKET);
+function startHttpServer() {
+  const app = express();
+  app.use(express.json());
 
-    while (!stopping) {
-        try {
-            await poll();
-        } catch (e) {
-            console.error("poll error", e);
-            await new Promise(r => setTimeout(r, 500)); // brief backoff on unexpected errors
-        }
+  app.get("/health", (_req, res) => res.status(200).json({ ok: true }));
+
+  app.post("/process", async (req, res) => {
+    try {
+      // Expect body like: { jobId, inputKey, outputKey, ops }
+      const job = req.body || {};
+      await processJob(job);
+      return res.status(200).json({ status: "ok" });
+    } catch (e) {
+      console.error("process error", e);
+      return res.status(500).json({ error: e?.message || "processing failed" });
     }
-    console.log("Worker stopped.");
+  });
+
+  app.listen(parseInt(WORKER_PORT, 10), () => {
+    console.log(`HTTP worker listening on ${WORKER_PORT}`);
+  });
+}
+
+(async function main() {
+  console.log("Worker starting. Bucket:", S3_BUCKET);
+
+  if (HTTP_MODE === "true") {
+    // HTTP load-balanced mode (no SQS)
+    startHttpServer();
+    return;
+  }
+
+  // SQS poller mode (if you ever get SQS later, set HTTP_MODE="false")
+  while (!stopping) {
+    try {
+      await poll();
+    } catch (e) {
+      console.error("poll error", e);
+      await new Promise(r => setTimeout(r, 500));
+    }
+  }
+  console.log("Worker stopped.");
 })().catch(err => { console.error(err); process.exit(1); });
