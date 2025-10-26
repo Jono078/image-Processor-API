@@ -17,9 +17,13 @@ const {
     WORKER_PORT = "9000" 
 } = process.env;
 
-if (!JOBS_QUEUE_URL || !S3_BUCKET) {
-    console.error("Missing env: JOBS_QUEUE_URL and/or S3_BUCKET");
-    process.exit(2);
+if (!S3_BUCKET) {
+  console.error("Missing env: S3_BUCKET");
+  process.exit(2);
+}
+if (HTTP_MODE !== "true" && !JOBS_QUEUE_URL) {
+  console.error("Missing env: JOBS_QUEUE_URL (required in SQS mode)");
+  process.exit(2);
 }
 
 const sqs = new SQSClient({ region: AWS_REGION });
@@ -82,30 +86,39 @@ process.on("SIGINT", () => {
 });
 
 async function poll() {
+    const VTO = parseInt(VISIBILITY_TIMEOUT_SEC, 10);
+    const VEXT = parseInt(VISIBILITY_EXTEND_SEC, 10);
+    const EMPTY_MS = parseInt(EMPTY_SLEEP_MS, 10);
+
     const resp = await sqs.send(new ReceiveMessageCommand({
         QueueUrl: JOBS_QUEUE_URL,
         MaxNumberOfMessages: 1,
         WaitTimeSeconds: 20,
-        VisibilityTimeout: parseInt(VISIBILITY_TIMEOUT_SEC, 10)
+        VisibilityTimeout: VTO
     }));
+
     if (!resp.Messages || resp.Messages.length === 0) {
-        await new Promise(r => setTimeout(r, parseInt(EMPTY_SLEEP_MS, 10)));
+        await new Promise(r => setTimeout(r, EMPTY_MS));
         return;
     }
 
     for (const m of resp.Messages) {
+        const hbMs = Math.max(10_000, (VTO * 1000) / 2);
         const heartbeat = setInterval(() => {
-            extend(m.ReceiptHandle, parseInt(VISIBILITY_TIMEOUT_SEC, 10)).catch(() => {});
-        }, Math.max(10000, (parseInt(VISIBILITY_TIMEOUT_SEC, 10) * 1000) / 2));
+        extend(m.ReceiptHandle, VEXT).catch(() => {});
+        }, hbMs);
 
         try {
-            const body = JSON.parse(m.Body);
-            await processJob(body);
-            await sqs.send(new DeleteMessageCommand({ QueueUrl: JOBS_QUEUE_URL, ReceiptHandle: m.ReceiptHandle }));
-            } catch (e) {
-                console.error("worker error", e); // let redrive → DLQ
-            } finally {
-                clearInterval(heartbeat);
+        const body = JSON.parse(m.Body);
+        await processJob(body);
+        await sqs.send(new DeleteMessageCommand({
+            QueueUrl: JOBS_QUEUE_URL,
+            ReceiptHandle: m.ReceiptHandle
+        }));
+        } catch (e) {
+        console.error("worker error", e); // message will be re-delivered or go to DLQ
+        } finally {
+        clearInterval(heartbeat);
         }
     }
 }
