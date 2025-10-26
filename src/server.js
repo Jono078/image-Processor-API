@@ -50,6 +50,9 @@ app.get("/v1/debug/seen-groups", requireAuth, (req, res) => {
 
   res.json({ username: claims["cognito:username"] || claims.username, rawGroups: raw, groups: asArray });
   });
+  app.get('/healthz', (req, res) => {
+  res.status(200).type('text/plain').send('api-ok');
+});
 
 app.get("/v1/configz", (req, res) => {
   res.json({

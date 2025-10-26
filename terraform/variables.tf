@@ -1,4 +1,4 @@
-﻿variable "aws_region" {
+variable "aws_region" {
   type        = string
   default     = "ap-southeast-2"
   description = "AWS region"
@@ -25,9 +25,9 @@ variable "frontend_url" {
 }
 
 variable "external_api_key" {
-  type        = string
-  sensitive   = true
-  default     = "dev-placeholder"
+  type      = string
+  sensitive = true
+  default   = "dev-placeholder"
 }
 
 variable "api_role_name" {
@@ -58,4 +58,42 @@ variable "enable_secret_ref" {
   type        = bool
   default     = false
   description = "Read Secret if it already exists (true) or just output name (false)"
+}
+variable "student_id" {
+  type        = string
+  description = "Your student id (suffix for names)"
+}
+
+variable "qut_username" {
+  type        = string
+  description = "Your QUT username email (for tags)"
+}
+
+variable "jobs_queue_name" {
+  type        = string
+  description = "Existing SQS queue name to enqueue to"
+}
+
+variable "lambda_role_name" {
+  type        = string
+  description = "Existing Lambda execution role (e.g., CAB432-Lambda-Role)"
+}
+
+# If your main.tf references these (it likely does), keep them too:
+variable "uploads_bucket_name" {
+  type        = string
+  description = "Bucket that emits ObjectCreated events for the Lambda trigger"
+  default     = null
+}
+
+variable "default_root_object" {
+  type        = string
+  description = "index.html for SPA; empty for plain files"
+  default     = ""
+}
+
+variable "attach_s3_trigger" {
+  type        = bool
+  description = "If true, TF manages S3 -> Lambda notification"
+  default     = false
 }
