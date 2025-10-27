@@ -55,6 +55,7 @@ async function processJob({ jobId, inputKey, outputKey, ops = {} }) {
     }
 
     const inputBuf = await getObjectBuffer(S3_BUCKET, inKey);
+    console.log("DEBUG inKey", inKey, "len", inputBuf.length, "magic", inputBuf.slice(0,8).toString("hex"));
     let img = sharp(inputBuf);
 
     if (ops?.resize?.width && ops?.resize?.height) {
