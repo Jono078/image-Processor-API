@@ -124,9 +124,18 @@ async function poll() {
     }
 }
 
-function startHttpServer() {
+async function startHttpServer() {
   const app = express();
   app.use(express.json());
+
+  let __instanceId = 'unknown';
+  try {
+    const r = await fetch('http://169.254.169.254/latest/meta-data/instance-id');
+    __instanceId = await r.text();
+  } catch (e) {
+    console.error('could not read instance-id', e?.message);
+  }
+  app.get('/whoami', (_req, res) => res.json({ instanceId: __instanceId }));
 
   app.get("/health", (_req, res) => res.status(200).json({ ok: true }));
 
